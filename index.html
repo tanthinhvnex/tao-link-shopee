@@ -576,32 +576,69 @@
             return null;
         }
 
+        // Hiển thị popup hướng dẫn resolve short link thủ công
+        async function showManualResolvePopup(shortUrl) {
+            const result = await Swal.fire({
+                title: 'Cần xử lý link ngắn',
+                html: `
+                    <div style="text-align: left; font-size: 14px;">
+                        <p><b>Link ngắn không thể tự động xử lý.</b></p>
+                        <p>Vui lòng làm theo các bước sau:</p>
+                        <ol style="padding-left: 20px; margin: 10px 0;">
+                            <li>Nhấn nút <b>"Mở Link"</b> bên dưới</li>
+                            <li>Đợi trang Shopee load xong</li>
+                            <li>Copy <b>link đầy đủ</b> từ thanh địa chỉ trình duyệt</li>
+                            <li>Quay lại đây và dán link mới</li>
+                        </ol>
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-external-link-alt"></i> Mở Link',
+                cancelButtonText: 'Đóng',
+                confirmButtonColor: '#ee4d2d'
+            });
+
+            if (result.isConfirmed) {
+                window.open(shortUrl, '_blank');
+            }
+            return null;
+        }
+
         // Resolve short link bằng CORS proxy
         async function resolveShortLink(shortUrl) {
-            // Thử các proxy song song để nhanh hơn
+            // Thử các proxy với timeout ngắn hơn
             const proxies = [
-                `https://api.allorigins.win/get?url=${encodeURIComponent(shortUrl)}`,
-                `https://corsproxy.io/?${encodeURIComponent(shortUrl)}`,
+                {
+                    url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(shortUrl)}`,
+                    type: 'text'
+                },
+                {
+                    url: `https://api.allorigins.win/raw?url=${encodeURIComponent(shortUrl)}`,
+                    type: 'text'
+                },
+                {
+                    url: `https://corsproxy.io/?${encodeURIComponent(shortUrl)}`,
+                    type: 'text'
+                }
             ];
 
-            // Tạo array các promises
-            const fetchPromises = proxies.map(async (proxyUrl) => {
+            // Tạo array các promises với timeout ngắn
+            const fetchPromises = proxies.map(async (proxy) => {
                 try {
-                    console.log('Trying proxy:', proxyUrl);
-                    const response = await fetchWithTimeout(proxyUrl, {
+                    console.log('Trying proxy:', proxy.url);
+                    const response = await fetchWithTimeout(proxy.url, {
                         method: 'GET',
                         redirect: 'follow'
-                    }, 10000);
+                    }, 6000);
 
-                    let html = '';
-                    if (proxyUrl.includes('allorigins.win/get')) {
-                        const data = await response.json();
-                        html = data.contents || '';
-                    } else {
-                        html = await response.text();
+                    if (!response.ok) {
+                        console.log('Proxy response not ok:', response.status);
+                        return null;
                     }
 
-                    if (!html) return null;
+                    const html = await response.text();
+                    if (!html || html.length < 100) return null;
 
                     const foundUrl = extractUrlFromHtml(html);
                     if (foundUrl) {
@@ -610,12 +647,12 @@
                     }
                     return null;
                 } catch (error) {
-                    console.log('Proxy failed:', proxyUrl, error.message);
+                    console.log('Proxy failed:', proxy.url, error.message);
                     return null;
                 }
             });
 
-            // Race để lấy kết quả đầu tiên thành công
+            // Chạy tất cả proxy song song
             const results = await Promise.all(fetchPromises);
             const validResult = results.find(r => r !== null);
 
@@ -623,7 +660,9 @@
                 return validResult;
             }
 
-            throw new Error('Không thể xử lý short link. Vui lòng mở link trong trình duyệt, đợi trang load xong, rồi copy link đầy đủ từ thanh địa chỉ.');
+            // Nếu tất cả proxy fail, hiển thị popup hướng dẫn
+            await showManualResolvePopup(shortUrl);
+            throw new Error('Vui lòng dán link đầy đủ từ trang sản phẩm Shopee (link có dạng shopee.vn/...)');
         }
 
         // Main function: Xử lý URL và tạo affiliate link
