@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <base href="/sale20_22_facebook/">
     <title>Tạo link Shopee - to_buy_to_use</title>
     <meta name="description" content="Thích coi review, thích mua đồ xịn - Công cụ tạo link Shopee">
 
@@ -323,8 +324,7 @@
         <img src="icon.jpg" alt="Thích coi review, thích mua đồ xịn" class="header-banner">
 
         <div class="header">
-            <h1>Tạo link Shopee nhận voucher đơn từ 50k</h1>
-            <div class="domain-badge">to_buy_to_use</div>
+            <h1>Tạo link Shopee nhận voucher giảm 25% tối đa 200k cho đơn từ 50k</h1>
         </div>
 
         <div class="main-card">
@@ -334,18 +334,11 @@
                         <label class="form-label">
                             <i class="fas fa-shopping-bag mr-1"></i>Link sản phẩm Shopee
                         </label>
-                        <div class="input-group">
-                            <input type="url"
-                                class="form-control"
-                                id="input_url"
-                                placeholder="Dán link Shopee vào đây..."
-                                required>
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="btnPaste">
-                                    <i class="fas fa-paste"></i>
-                                </span>
-                            </div>
-                        </div>
+                        <input type="url"
+                            class="form-control"
+                            id="input_url"
+                            placeholder="Dán link Shopee vào đây..."
+                            required>
                     </div>
 
                     <button type="submit" class="btn btn-primary-custom btn-custom btn-block" id="btnSubmit">
@@ -376,7 +369,6 @@
             </div>
         </div>
 
-        <div class="footer-text">to_buy_to_use</div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -732,7 +724,7 @@
         function showResult(affiliateLink) {
             $('#affiliate-links-container').html(`
                 <button class="btn-copy-main copy-btn" data-link="${affiliateLink}">
-                    <i class="fas fa-check-circle mr-2"></i>Đã tạo xong link, nhấn vào đây để copy và paste vào FB
+                    <i class="fas fa-check-circle mr-2"></i>✅ Link đã gắn vouchers FB<br>Bấm để copy và paste vào bài viết
                 </button>
             `);
             $('#result-section').addClass('show');
@@ -743,28 +735,6 @@
         }
 
         // ==================== EVENT HANDLERS ====================
-        $('#btnPaste').on('click', function() {
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.readText()
-                    .then(text => {
-                        if (text) {
-                            $('#input_url').val(text.trim());
-                            showToast('Đã dán link!');
-                            setTimeout(() => {
-                                $('#link-form').submit();
-                            }, 300);
-                        }
-                    })
-                    .catch(() => {
-                        $('#input_url').focus();
-                        showToast('Vui lòng dán bằng Ctrl+V', 'info');
-                    });
-            } else {
-                $('#input_url').focus();
-                showToast('Vui lòng dán bằng Ctrl+V', 'info');
-            }
-        });
-
         $('#link-form').on('submit', async function(e) {
             e.preventDefault();
 
