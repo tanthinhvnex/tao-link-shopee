@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <base href="/sale20_22_facebook/">
-    <title>Tạo link Shopee - to_buy_to_use</title>
-    <meta name="description" content="Thích coi review, thích mua đồ xịn - Công cụ tạo link Shopee">
+    <base href="/tao-link-shopee/">
+    <title>Tạo Link Shopee Nhận Voucher 25%</title>
+    <meta name="description" content="Công cụ tạo link Shopee với voucher giảm 25% cho Facebook và Instagram">
 
     <link rel="icon" type="image/png" href="favicon.png">
 
@@ -287,6 +287,68 @@
             }
         }
 
+        .btn-instagram {
+            background: linear-gradient(135deg, #833AB4, #C13584, #E1306C, #FD1D1D, #F77737);
+            color: white;
+        }
+
+        .btn-instagram:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(193, 53, 132, 0.4);
+            color: white;
+        }
+
+        .btn-facebook {
+            background: linear-gradient(135deg, #1877f2, #0d5bbd);
+            color: white;
+        }
+
+        .btn-facebook:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4);
+            color: white;
+        }
+
+        .platform-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .btn-instagram-cta {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #833AB4, #C13584, #E1306C);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            text-decoration: none;
+            border: none;
+            box-shadow: 0 4px 15px rgba(193, 53, 132, 0.4);
+            animation: pulse-ig 2s infinite;
+            transition: all 0.3s;
+        }
+
+        .btn-instagram-cta:hover {
+            background: linear-gradient(135deg, #6d2a9b, #a12a6e, #c1215a);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(193, 53, 132, 0.5);
+        }
+
+        @keyframes pulse-ig {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(193, 53, 132, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(193, 53, 132, 0.6);
+            }
+        }
+
         .instructions-image {
             max-width: 100%;
             margin-top: 0.75rem;
@@ -324,7 +386,7 @@
         <img src="icon.jpg" alt="Thích coi review, thích mua đồ xịn" class="header-banner">
 
         <div class="header">
-            <h1>Tạo link Shopee nhận voucher giảm 25% tối đa 200k cho đơn từ 50k</h1>
+            <h1>Tạo Link Shopee Nhận Voucher Giảm 25% Tối Đa 200k Cho Đơn Từ 50k</h1>
         </div>
 
         <div class="main-card">
@@ -341,11 +403,18 @@
                             required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary-custom btn-custom btn-block" id="btnSubmit">
-                        <i class="fas fa-magic mr-1"></i>
-                        <span class="btn-text">Tạo Link Ngay</span>
-                        <div class="spinner"></div>
-                    </button>
+                    <div class="platform-buttons">
+                        <button type="button" class="btn btn-facebook btn-custom" id="btnFacebook">
+                            <i class="fab fa-facebook mr-1"></i>
+                            <span class="btn-text-fb">Tạo Link Facebook</span>
+                            <div class="spinner spinner-fb"></div>
+                        </button>
+                        <button type="button" class="btn btn-instagram btn-custom" id="btnInstagram">
+                            <i class="fab fa-instagram mr-1"></i>
+                            <span class="btn-text-ig">Tạo Link Instagram</span>
+                            <div class="spinner spinner-ig"></div>
+                        </button>
+                    </div>
                 </form>
 
                 <div id="result-section" class="result-section">
@@ -353,17 +422,16 @@
                 </div>
             </div>
 
-            <div class="instructions-box">
+            <div class="instructions-box" id="instructions-box">
                 <h6><i class="fas fa-lightbulb mr-1" style="color: var(--primary)"></i>Hướng dẫn</h6>
-                <ol>
+                <ol id="instructions-list">
+                    <li>Chọn nền tảng: <b>Facebook</b> hoặc <b>Instagram</b></li>
                     <li>Sau khi tạo link, nhấn <b>Sao chép</b></li>
-                    <li>Dán link dưới bình luận bài đăng</li>
+                    <li id="step-platform"><!-- Nội dung động --></li>
                     <li>Click vào link để mở Shopee sẽ nhận được mã</li>
                 </ol>
-                <div class="instructions-content">
-                    <a href="https://www.facebook.com/groups/1021167313781144/permalink/1021956923702183" target="_blank" class="btn btn-facebook-cta">
-                        <i class="fab fa-facebook mr-2"></i>Đến bài đăng Facebook ngay
-                    </a>
+                <div class="instructions-content" id="platform-cta">
+                    <!-- Dynamic content will be inserted here -->
                     <img src="anh_voucher.png" alt="voucher giảm 25%" class="instructions-image">
                 </div>
             </div>
@@ -378,7 +446,26 @@
         // ==================== CẤU HÌNH ====================
         const CONFIG = {
             affiliateId: "17352620178",
-            subId: "product----",
+            subIdBase: "product----",
+            platforms: {
+                facebook: {
+                    subId: "product----fb",
+                    name: "Facebook",
+                    ctaUrl: "https://www.facebook.com/groups/1021167313781144/permalink/1021956923702183",
+                    ctaText: "Đến bài đăng Facebook ngay",
+                    icon: "fab fa-facebook",
+                    copyText: "Link đã gắn voucher FB",
+                    instructionStep: "Dán link vào bình luận dưới bài đăng"
+                },
+                instagram: {
+                    subId: "product----ig",
+                    name: "Instagram",
+                    icon: "fab fa-instagram",
+                    copyText: "Link đã gắn voucher Instagram",
+                    instructionStep: "Copy link và chia sẻ trực tiếp",
+                    showCta: false // Instagram không cần nút CTA
+                }
+            },
             // Thay bằng URL Worker của bạn sau khi deploy
             workerUrl: "https://shopee-link-resolver.tanthinhvnex.workers.dev"
         };
@@ -486,9 +573,10 @@
         }
 
         // Build affiliate URL
-        function buildAffiliateUrl(canonicalUrl) {
+        function buildAffiliateUrl(canonicalUrl, platform = 'facebook') {
             const encodedUrl = encodeURIComponent(canonicalUrl);
-            return `https://s.shopee.vn/an_redir?origin_link=${encodedUrl}&affiliate_id=${CONFIG.affiliateId}&sub_id=${CONFIG.subId}`;
+            const subId = CONFIG.platforms[platform].subId;
+            return `https://s.shopee.vn/an_redir?origin_link=${encodedUrl}&affiliate_id=${CONFIG.affiliateId}&sub_id=${subId}`;
         }
 
         // Extract product IDs từ HTML response
@@ -668,7 +756,7 @@
         }
 
         // Main function: Xử lý URL và tạo affiliate link
-        async function processShopeeUrl(inputUrl) {
+        async function processShopeeUrl(inputUrl, platform = 'facebook') {
             let workingUrl = inputUrl.trim();
 
             // Validate URL cơ bản
@@ -699,35 +787,78 @@
             const canonicalUrl = buildCanonicalUrl(ids.shopId, ids.itemId);
 
             // Bước 4 & 5: Build affiliate URL
-            const affiliateUrl = buildAffiliateUrl(canonicalUrl);
+            const affiliateUrl = buildAffiliateUrl(canonicalUrl, platform);
 
             return {
                 affiliateUrl,
                 canonicalUrl,
                 shopId: ids.shopId,
-                itemId: ids.itemId
+                itemId: ids.itemId,
+                platform
             };
         }
 
         // ==================== UI HELPERS ====================
-        function setLoading(isLoading) {
-            $('#btnSubmit').prop('disabled', isLoading);
-            if (isLoading) {
-                $('.btn-text').text('Đang xử lý...');
-                $('.spinner').addClass('show');
+        function setLoading(isLoading, platform = null) {
+            const btnId = platform ? `#btn${platform.charAt(0).toUpperCase() + platform.slice(1)}` : '#btnFacebook, #btnInstagram';
+            const btnTextClass = platform ? `.btn-text-${platform === 'facebook' ? 'fb' : 'ig'}` : '.btn-text-fb, .btn-text-ig';
+            const spinnerClass = platform ? `.spinner-${platform === 'facebook' ? 'fb' : 'ig'}` : '.spinner-fb, .spinner-ig';
+
+            if (platform) {
+                $(btnId).prop('disabled', isLoading);
+                // Disable the other button
+                const otherPlatform = platform === 'facebook' ? 'instagram' : 'facebook';
+                $(`#btn${otherPlatform.charAt(0).toUpperCase() + otherPlatform.slice(1)}`).prop('disabled', isLoading);
+
+                if (isLoading) {
+                    $(btnTextClass).text('Đang xử lý...');
+                    $(spinnerClass).addClass('show');
+                } else {
+                    $(btnTextClass).text(platform === 'facebook' ? 'Tạo Link Facebook' : 'Tạo Link Instagram');
+                    $(spinnerClass).removeClass('show');
+                }
             } else {
-                $('.btn-text').text('Tạo Link Ngay');
-                $('.spinner').removeClass('show');
+                $('#btnFacebook, #btnInstagram').prop('disabled', isLoading);
             }
         }
 
-        function showResult(affiliateLink) {
+        function updatePlatformCTA(platform) {
+            const config = CONFIG.platforms[platform];
+
+            // Update instruction step
+            $('#step-platform').text(config.instructionStep);
+
+            // Update CTA content
+            let ctaHtml = '';
+            if (config.showCta !== false) {
+                // Show CTA button for platforms that need it (Facebook)
+                ctaHtml = `
+                    <a href="${config.ctaUrl}" target="_blank" class="btn btn-facebook-cta">
+                        <i class="${config.icon} mr-2"></i>${config.ctaText}
+                    </a>
+                `;
+            }
+            ctaHtml += '<img src="anh_voucher.png" alt="voucher giảm 25%" class="instructions-image">';
+
+            $('#platform-cta').html(ctaHtml);
+        }
+
+        function showResult(affiliateLink, platform = 'facebook') {
+            const config = CONFIG.platforms[platform];
+            const icon = platform === 'facebook' ? '📘' : '📷';
+            const actionText = platform === 'facebook' ?
+                'Bấm để copy và paste vào bài viết' :
+                'Bấm để copy và chia sẻ';
+
             $('#affiliate-links-container').html(`
                 <button class="btn-copy-main copy-btn" data-link="${affiliateLink}">
-                    ✅ Link đã gắn vouchers FB<br>Bấm để copy và paste vào bài viết
+                    ${icon} ${config.copyText}<br>${actionText}
                 </button>
             `);
             $('#result-section').addClass('show');
+
+            // Update CTA button and instructions
+            updatePlatformCTA(platform);
 
             $('html, body').animate({
                 scrollTop: $('#result-section').offset().top - 15
@@ -735,27 +866,33 @@
         }
 
         // ==================== EVENT HANDLERS ====================
-        $('#link-form').on('submit', async function(e) {
-            e.preventDefault();
-
+        async function handlePlatformClick(platform) {
             const url = $('#input_url').val().trim();
             if (!url) {
                 showToast('Vui lòng nhập link Shopee!', 'warning');
                 return;
             }
 
-            setLoading(true);
+            setLoading(true, platform);
             $('#result-section').removeClass('show');
 
             try {
-                const result = await processShopeeUrl(url);
-                showResult(result.affiliateUrl);
-                showToast('Tạo link thành công!');
+                const result = await processShopeeUrl(url, platform);
+                showResult(result.affiliateUrl, platform);
+                showToast(`Tạo link ${CONFIG.platforms[platform].name} thành công!`);
             } catch (error) {
                 showToast(error.message, 'error');
             } finally {
-                setLoading(false);
+                setLoading(false, platform);
             }
+        }
+
+        $('#btnFacebook').on('click', function() {
+            handlePlatformClick('facebook');
+        });
+
+        $('#btnInstagram').on('click', function() {
+            handlePlatformClick('instagram');
         });
 
         $(document).on('click', '.copy-btn', function() {
