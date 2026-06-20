@@ -193,17 +193,75 @@ async function resolveShortLink(shortUrl) {
 // ==================== INSTAGRAM REDIRECT ====================
 const AFFILIATE_ID = '17352620178';
 
-// Build Instagram redirect URL - dùng route an_redir chính thức của Shopee
-// (route này đã được Shopee đăng ký App Link/Universal Link nên tự mở app)
-function buildInstagramRedirectUrl(productUrl, affId, subId) {
-    const encodedUrl = encodeURIComponent(productUrl);
-    return `https://s.shopee.vn/an_redir?origin_link=${encodedUrl}&affiliate_id=${affId}&sub_id=${subId}`;
+// Generate random tracking id (giống uls_trackid / utm_term)
+function generateTrackingId() {
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    for (let i = 0; i < 12; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+// Lấy credential_token từ trang sản phẩm Shopee (nếu có)
+async function fetchCredentialToken(productUrl) {
+    try {
+        const response = await fetch(productUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            },
+            redirect: 'follow'
+        });
+
+        if (!response.ok) return null;
+
+        const html = await response.text();
+        const credMatch = html.match(/"credential_token["\s:]+([a-zA-Z0-9_-]+)"/i) ||
+                         html.match(/credential_token=([a-zA-Z0-9_-]+)/i);
+        return credMatch ? credMatch[1] : null;
+    } catch {
+        return null;
+    }
+}
+
+// Build Instagram redirect URL - gắn UTM params trực tiếp vào shopee.vn/product/...
+// (giống cách Shopee Affiliate gắn tracking cho traffic ngoài, không qua an_redir
+// để tránh việc app mở trang chủ trước rồi mới chuyển sang sản phẩm)
+async function buildInstagramRedirectUrl(productUrl, affId, subId) {
+    const affiliatePrefix = 'an_' + affId;
+
+    const params = {
+        mmp_pid: affiliatePrefix,
+        utm_medium: 'affiliates',
+        utm_source: affiliatePrefix,
+        utm_content: subId,
+        utm_campaign: '-',
+        uls_trackid: generateTrackingId(),
+        utm_term: generateTrackingId()
+    };
+
+    const credentialToken = await fetchCredentialToken(productUrl);
+    if (credentialToken) {
+        params.credential_token = credentialToken;
+    }
+
+    const url = new URL(productUrl);
+    Object.keys(params).forEach(key => {
+        url.searchParams.set(key, params[key]);
+    });
+
+    return url.toString();
 }
 
 // Handle Instagram redirect
-function handleInstagramRedirect(productUrl, affId, subId) {
-    const redirectUrl = buildInstagramRedirectUrl(productUrl, affId, subId);
-    return Response.redirect(redirectUrl, 302);
+async function handleInstagramRedirect(productUrl, affId, subId) {
+    try {
+        const redirectUrl = await buildInstagramRedirectUrl(productUrl, affId, subId);
+        return Response.redirect(redirectUrl, 302);
+    } catch {
+        return Response.redirect(productUrl, 302);
+    }
 }
 
 // ==================== MAIN HANDLER ====================
